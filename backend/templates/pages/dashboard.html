@@ -34,7 +34,7 @@
       {% for scan in metrics.recent %}
         <div class="mini-row">
           <span>{{ scan.scan_hash|truncatechars:13 }}</span>
-          <span>{{ scan.status_label }}</span>
+          <span>{% include "components/risk_badge.html" %}</span>
           <span>{{ scan.created_at|date:"M d, H:i" }}</span>
           <a href="{% url 'result' scan.id %}">Open</a>
         </div>
