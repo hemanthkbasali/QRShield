@@ -3,6 +3,8 @@ document.addEventListener("DOMContentLoaded", () => {
     window.lucide.createIcons();
   }
 
+  initTopNavigation();
+  initCustomSelects();
   initPasswordToggles();
   initUploadPreview();
   initScanProgress();
@@ -12,6 +14,191 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("resize", debounce(drawCharts, 160));
 });
+
+function initTopNavigation() {
+  const panelToggles = document.querySelectorAll("[data-panel-toggle]");
+  const panels = document.querySelectorAll("[data-panel]");
+  const searchOpen = document.querySelector("[data-search-open]");
+  const searchModal = document.querySelector("[data-search-modal]");
+  const searchClose = document.querySelector("[data-search-close]");
+  const searchInput = document.getElementById("globalSearchInput");
+  let searchReturnTarget = null;
+
+  function closePanels(exceptId = null) {
+    panels.forEach((panel) => {
+      if (panel.id === exceptId) return;
+      panel.hidden = true;
+      const toggle = document.querySelector(`[data-panel-toggle="${panel.id}"]`);
+      if (toggle) toggle.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  panelToggles.forEach((toggle) => {
+    toggle.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const panelId = toggle.dataset.panelToggle;
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      const willOpen = panel.hidden;
+      closePanels(willOpen ? panelId : null);
+      panel.hidden = !willOpen;
+      toggle.setAttribute("aria-expanded", String(willOpen));
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-topbar-popover]")) {
+      closePanels();
+    }
+  });
+
+  function openSearchModal() {
+    if (!searchModal) return;
+    closePanels();
+    searchReturnTarget = document.activeElement;
+    searchModal.hidden = false;
+    searchOpen?.setAttribute("aria-expanded", "true");
+    window.setTimeout(() => searchInput?.focus(), 0);
+  }
+
+  function closeSearchModal() {
+    if (!searchModal || searchModal.hidden) return;
+    searchModal.hidden = true;
+    searchOpen?.setAttribute("aria-expanded", "false");
+    if (searchReturnTarget && typeof searchReturnTarget.focus === "function") {
+      searchReturnTarget.focus();
+    }
+  }
+
+  searchOpen?.addEventListener("click", openSearchModal);
+  searchClose?.addEventListener("click", closeSearchModal);
+  searchModal?.addEventListener("click", (event) => {
+    if (event.target === searchModal) {
+      closeSearchModal();
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      openSearchModal();
+      return;
+    }
+    if (event.key === "Escape") {
+      closePanels();
+      closeSearchModal();
+    }
+  });
+}
+
+function initCustomSelects() {
+  const selects = document.querySelectorAll("[data-custom-select]");
+  if (!selects.length) return;
+
+  function closeSelect(select) {
+    const trigger = select.querySelector("[data-custom-select-trigger]");
+    const menu = select.querySelector("[data-custom-select-menu]");
+    if (!trigger || !menu) return;
+    menu.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+    select.classList.remove("is-open");
+  }
+
+  function closeOtherSelects(activeSelect) {
+    selects.forEach((select) => {
+      if (select !== activeSelect) closeSelect(select);
+    });
+  }
+
+  selects.forEach((select) => {
+    const trigger = select.querySelector("[data-custom-select-trigger]");
+    const menu = select.querySelector("[data-custom-select-menu]");
+    const input = select.querySelector("[data-custom-select-input]");
+    const label = select.querySelector("[data-custom-select-label]");
+    const options = Array.from(select.querySelectorAll("[data-value]"));
+
+    if (!trigger || !menu || !input || !label || !options.length) return;
+
+    function openSelect() {
+      closeOtherSelects(select);
+      menu.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      select.classList.add("is-open");
+    }
+
+    function toggleSelect() {
+      if (menu.hidden) openSelect();
+      else closeSelect(select);
+    }
+
+    function selectOption(option) {
+      input.value = option.dataset.value || "";
+      label.textContent = option.textContent.trim();
+      label.dataset.statusValue = input.value;
+      options.forEach((item) => {
+        const isSelected = item === option;
+        item.classList.toggle("is-selected", isSelected);
+        item.setAttribute("aria-selected", String(isSelected));
+      });
+      closeSelect(select);
+      trigger.focus();
+    }
+
+    trigger.addEventListener("click", (event) => {
+      event.stopPropagation();
+      toggleSelect();
+    });
+
+    trigger.addEventListener("keydown", (event) => {
+      if (!["ArrowDown", "Enter", " "].includes(event.key)) return;
+      event.preventDefault();
+      openSelect();
+      const current = options.find((option) => option.classList.contains("is-selected")) || options[0];
+      current.focus();
+    });
+
+    options.forEach((option, index) => {
+      option.addEventListener("click", (event) => {
+        event.stopPropagation();
+        selectOption(option);
+      });
+
+      option.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeSelect(select);
+          trigger.focus();
+          return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          selectOption(option);
+          return;
+        }
+
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+          event.preventDefault();
+          const direction = event.key === "ArrowDown" ? 1 : -1;
+          const nextIndex = (index + direction + options.length) % options.length;
+          options[nextIndex].focus();
+        }
+      });
+    });
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("[data-custom-select]")) {
+      selects.forEach(closeSelect);
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      selects.forEach(closeSelect);
+    }
+  });
+}
 
 function initPasswordToggles() {
   document.querySelectorAll("[data-toggle-password]").forEach((button) => {

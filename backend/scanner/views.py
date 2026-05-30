@@ -196,6 +196,40 @@ def threat_intel(request):
 
 
 @login_required
+def reports(request):
+    query = normalize_search(request.GET.get("q"))
+    status = clean_status_filter(request.GET.get("status"))
+    qs = get_user_scan_queryset(request.user)
+
+    if query:
+        qs = qs.filter(
+            Q(scan_hash__icontains=query)
+            | Q(extracted_text__icontains=query)
+            | Q(normalized_url__icontains=query)
+        )
+    if status:
+        qs = qs.filter(risk_level=status)
+
+    paginator = Paginator(qs, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    query_params = request.GET.copy()
+    query_params.pop("page", None)
+
+    return render(
+        request,
+        "pages/reports.html",
+        {
+            "scans": page_obj.object_list,
+            "page_obj": page_obj,
+            "querystring": query_params.urlencode(),
+            "query": query,
+            "status": status,
+            "total_reports": qs.exclude(report_file="").count(),
+        },
+    )
+
+
+@login_required
 def report_preview(request, scan_id):
     scan = get_owned_scan(request.user, scan_id)
     return render(request, "pages/report_preview.html", {"scan": scan})

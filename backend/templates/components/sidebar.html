@@ -18,7 +18,7 @@
     <a class="side-link {% if active == 'threat_intel' %}is-active{% endif %}" href="{% url 'threat_intel' %}">
       <i data-lucide="bar-chart-3"></i><span>Security Analytics</span>
     </a>
-    <a class="side-link {% if active == 'report_preview' %}is-active{% endif %}" href="{% url 'history' %}">
+    <a class="side-link {% if active == 'reports' or active == 'report_preview' %}is-active{% endif %}" href="{% url 'reports' %}">
       <i data-lucide="file-bar-chart"></i><span>Reports</span>
     </a>
     <a class="side-link {% if active == 'settings' %}is-active{% endif %}" href="{% url 'settings' %}">

@@ -8,16 +8,78 @@
           <p class="topbar-kicker">{% block app_label %}Main Dashboard{% endblock %}</p>
         </div>
         <div class="topbar-actions">
-          <button class="icon-btn" type="button" aria-label="Inbox"><i data-lucide="inbox"></i></button>
-          <button class="icon-btn has-alert" type="button" aria-label="Notifications"><i data-lucide="bell"></i></button>
-          <button class="icon-btn" type="button" aria-label="Search"><i data-lucide="search"></i></button>
-          <div class="user-chip">
-            <span class="avatar-dot">{{ request.user.username|first|upper }}</span>
-            <span>{{ request.user.username|default:"QRShield" }}</span>
-            <i data-lucide="chevron-down"></i>
+          <a class="icon-btn" href="{% url 'reports' %}" aria-label="Reports archive"><i data-lucide="archive"></i></a>
+
+          <div class="topbar-popover" data-topbar-popover>
+            <button class="icon-btn has-alert" type="button" aria-label="Notifications" aria-controls="notificationPanel" aria-expanded="false" data-panel-toggle="notificationPanel">
+              <i data-lucide="bell"></i>
+            </button>
+            <div id="notificationPanel" class="dropdown-panel notification-panel" data-panel hidden>
+              <div class="dropdown-title">
+                <strong>Notifications</strong>
+                <span>Security queue</span>
+              </div>
+              <a class="dropdown-link" href="{% url 'history' %}?status=warning">
+                <i data-lucide="triangle-alert"></i>
+                <span>Review warning scans</span>
+              </a>
+              <a class="dropdown-link" href="{% url 'reports' %}">
+                <i data-lucide="file-bar-chart"></i>
+                <span>Open report archive</span>
+              </a>
+              <a class="dropdown-link" href="{% url 'scanner' %}">
+                <i data-lucide="scan-line"></i>
+                <span>Start a new scan</span>
+              </a>
+            </div>
+          </div>
+
+          <button class="icon-btn" type="button" aria-label="Search" aria-haspopup="dialog" data-search-open><i data-lucide="search"></i></button>
+
+          <div class="topbar-popover" data-topbar-popover>
+            <button class="user-chip" type="button" aria-label="Profile menu" aria-controls="profileMenu" aria-expanded="false" data-panel-toggle="profileMenu">
+              <span class="avatar-dot">{{ request.user.username|first|upper }}</span>
+              <span>{{ request.user.username|default:"QRShield" }}</span>
+              <i data-lucide="chevron-down"></i>
+            </button>
+            <div id="profileMenu" class="dropdown-panel profile-menu" data-panel hidden>
+              <a class="dropdown-link" href="{% url 'settings' %}#profile-summary">
+                <i data-lucide="user-round"></i>
+                <span>View Profile</span>
+              </a>
+              <a class="dropdown-link" href="{% url 'settings' %}#account-settings">
+                <i data-lucide="settings"></i>
+                <span>Settings</span>
+              </a>
+              <a class="dropdown-link danger" href="{% url 'logout' %}">
+                <i data-lucide="log-out"></i>
+                <span>Logout</span>
+              </a>
+            </div>
           </div>
         </div>
       </header>
+      <div class="modal-backdrop" data-search-modal hidden>
+        <section class="search-modal" role="dialog" aria-modal="true" aria-labelledby="globalSearchTitle">
+          <div class="modal-head">
+            <h2 id="globalSearchTitle">Global search</h2>
+            <button class="icon-btn" type="button" aria-label="Close search" data-search-close><i data-lucide="x"></i></button>
+          </div>
+          <form class="global-search-form" method="get" action="{% url 'history' %}" data-search-form>
+            <div class="input-icon">
+              <i data-lucide="search"></i>
+              <input id="globalSearchInput" class="input-lux" name="q" placeholder="Scan hash, URL, or payload" autocomplete="off">
+            </div>
+            <button class="btn-primary" type="submit"><i data-lucide="search"></i> Search</button>
+          </form>
+          <div class="quick-link-grid">
+            <a class="dropdown-link" href="{% url 'scanner' %}"><i data-lucide="scan-search"></i><span>Scanner</span></a>
+            <a class="dropdown-link" href="{% url 'history' %}"><i data-lucide="history"></i><span>Scan History</span></a>
+            <a class="dropdown-link" href="{% url 'reports' %}"><i data-lucide="file-bar-chart"></i><span>Reports</span></a>
+            <a class="dropdown-link" href="{% url 'threat_intel' %}"><i data-lucide="bar-chart-3"></i><span>Analytics</span></a>
+          </div>
+        </section>
+      </div>
       {% block app_content %}{% endblock %}
     </main>
   </div>

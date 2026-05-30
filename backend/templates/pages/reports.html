@@ -1,21 +1,21 @@
 {% extends "layouts/app.html" %}
-{% block title %}Scan History | QRShield{% endblock %}
-{% block app_label %}Scan History{% endblock %}
+{% block title %}Reports | QRShield{% endblock %}
+{% block app_label %}Reports Archive{% endblock %}
 {% block app_content %}
 <section class="history-page">
   <div class="section-heading">
     <div>
-      <h1>SCAN HISTORY</h1>
-      <p class="subcopy">Search, filter, and download forensic QR security reports.</p>
+      <h1>REPORTS</h1>
+      <p class="subcopy">Preview and download QR security reports from saved scan records.</p>
     </div>
-    <span class="timeline-label">Timeline view</span>
+    <span class="timeline-label">{{ total_reports|default:0 }} generated</span>
   </div>
 
   <article class="panel-card table-panel">
     <form class="history-filters" method="get">
       <div class="input-icon">
         <i data-lucide="search"></i>
-        <input class="input-lux" name="q" value="{{ query }}" placeholder="Search">
+        <input class="input-lux" name="q" value="{{ query }}" placeholder="Search reports">
       </div>
       <div class="custom-select" data-custom-select>
         <input type="hidden" name="status" value="{{ status }}" data-custom-select-input>
@@ -31,7 +31,7 @@
           <button class="custom-select-option status-filter-option status-filter-option-invalid {% if status == 'invalid' %}is-selected{% endif %}" type="button" role="option" aria-selected="{% if status == 'invalid' %}true{% else %}false{% endif %}" data-value="invalid"><span class="status-option-badge status-option-badge-invalid">Invalid</span></button>
         </div>
       </div>
-      <button class="icon-btn violet" type="submit" aria-label="Apply filters"><i data-lucide="sliders-horizontal"></i></button>
+      <button class="icon-btn violet" type="submit" aria-label="Apply report filters"><i data-lucide="sliders-horizontal"></i></button>
     </form>
 
     <div class="scan-table-wrap">
@@ -40,9 +40,9 @@
           <tr>
             <th>Timestamp</th>
             <th>Scan Hash</th>
-            <th>Source IP</th>
             <th>URL</th>
             <th>Status</th>
+            <th>Report</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -51,22 +51,25 @@
             <tr>
               <td>{{ scan.created_at|date:"d.m.Y H:i:s" }}</td>
               <td>{{ scan.scan_hash|truncatechars:18 }}</td>
-              <td>{{ scan.source_ip|default:"local" }}</td>
-              <td>{{ scan.normalized_url|default:scan.extracted_text|truncatechars:34 }}</td>
+              <td>{{ scan.normalized_url|default:scan.extracted_text|truncatechars:42 }}</td>
               <td>{% include "components/risk_badge.html" %}</td>
+              <td>{% if scan.report_file %}Generated{% else %}Pending{% endif %}</td>
               <td>
-                <a class="table-action" href="{% url 'report_preview' scan.id %}">Generate/Download</a>
+                <div class="report-action-group">
+                  <a class="table-action" href="{% url 'report_preview' scan.id %}">Preview</a>
+                  <a class="table-action" href="{% url 'download_report' scan.id %}">Download</a>
+                </div>
               </td>
             </tr>
           {% empty %}
-            <tr><td colspan="6" class="empty-state">No scans match this filter.</td></tr>
+            <tr><td colspan="6" class="empty-state">No report records match this filter.</td></tr>
           {% endfor %}
         </tbody>
       </table>
     </div>
 
     {% if page_obj.paginator.num_pages > 1 %}
-      <nav class="pagination-controls" aria-label="Scan history pagination">
+      <nav class="pagination-controls" aria-label="Report pagination">
         {% if page_obj.has_previous %}
           <a class="btn-secondary" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"><i data-lucide="chevron-left"></i> Previous</a>
         {% else %}
