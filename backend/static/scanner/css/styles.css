@@ -519,6 +519,62 @@ select {
   margin-top: 1rem;
 }
 
+.workstation-layout {
+  align-items: stretch;
+}
+
+.workstation-card {
+  display: flex;
+  min-height: 13.75rem;
+  flex-direction: column;
+}
+
+.workstation-card.top-row {
+  min-height: 19rem;
+}
+
+.workstation-layout .upload-panel {
+  grid-column: span 5;
+}
+
+.workstation-layout .preview-card {
+  grid-column: span 3;
+}
+
+.live-status-card {
+  grid-column: span 4;
+}
+
+.analysis-summary-card,
+.risk-meter-card,
+.classification-card {
+  grid-column: span 4;
+}
+
+.detection-checks-card {
+  grid-column: span 5;
+}
+
+.extracted-details-card {
+  grid-column: span 4;
+}
+
+.recommendations-card {
+  grid-column: span 3;
+}
+
+.metadata-card {
+  grid-column: span 3;
+}
+
+.heuristic-card {
+  grid-column: span 5;
+}
+
+.timeline-card {
+  grid-column: span 4;
+}
+
 .full-span {
   grid-column: 1 / -1;
 }
@@ -578,6 +634,22 @@ select {
   font-size: 0.7rem;
 }
 
+.dense-form {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.compact-dropzone {
+  min-height: 11.8rem;
+}
+
+.compact-dropzone svg {
+  width: 2.15rem;
+  height: 2.15rem;
+}
+
 .preview-frame,
 .qr-neon-sample {
   position: relative;
@@ -597,6 +669,11 @@ select {
   width: 100%;
   max-height: 16rem;
   object-fit: contain;
+}
+
+.compact-preview {
+  flex: 1;
+  min-height: 13.7rem;
 }
 
 .qr-sample-grid {
@@ -644,6 +721,10 @@ select {
 .preview-meta strong {
   color: #fff;
   font-size: 0.85rem;
+}
+
+.dense-meta {
+  margin-top: 0.65rem;
 }
 
 .scan-progress {
@@ -808,6 +889,40 @@ select {
   box-shadow: 0 0 12px rgba(54, 217, 138, 0.9);
 }
 
+.status-stack {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.status-stack div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.65rem;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 0.65rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.status-stack p {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.status-stack small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.compact-metrics {
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: auto;
+}
+
 .check-grid {
   position: relative;
   z-index: 1;
@@ -830,6 +945,16 @@ select {
 
 .check-grid svg {
   color: #c084fc;
+}
+
+.dense-check-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.dense-check-grid div {
+  min-height: 3rem;
+  padding: 0.7rem;
 }
 
 .result-layout .risk-summary {
@@ -894,6 +1019,27 @@ select {
   --risk-color: #a1a1aa;
 }
 
+.risk-meter-card.level-safe {
+  --risk-color: var(--safe);
+}
+
+.risk-meter-card.level-warning {
+  --risk-color: var(--warn);
+}
+
+.risk-meter-card.level-malicious {
+  --risk-color: var(--crimson);
+}
+
+.risk-meter-card.level-invalid {
+  --risk-color: #a1a1aa;
+}
+
+.risk-meter-card {
+  --risk-color: #a1a1aa;
+  text-align: center;
+}
+
 .risk-orb {
   position: relative;
   z-index: 1;
@@ -947,6 +1093,17 @@ select {
 
 .compact-orb span {
   margin-top: -1.8rem;
+}
+
+.risk-scale {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.45rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 700;
 }
 
 .threat-label {
@@ -1013,6 +1170,15 @@ select {
   background: rgba(255, 255, 255, 0.035);
 }
 
+.dense-metadata {
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.dense-metadata div {
+  padding: 0.62rem;
+}
+
 .metadata-grid span,
 .metadata-grid strong {
   display: block;
@@ -1027,6 +1193,98 @@ select {
   color: #fff;
   font-size: 0.76rem;
   word-break: break-word;
+}
+
+.summary-value {
+  position: relative;
+  z-index: 1;
+  min-height: 4.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 0.8rem;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.compact-facts {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+}
+
+.compact-facts.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.compact-facts div {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 0.62rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.compact-facts span,
+.compact-facts strong {
+  display: block;
+}
+
+.compact-facts span {
+  color: var(--muted);
+  font-size: 0.66rem;
+}
+
+.compact-facts strong {
+  color: #fff;
+  font-size: 0.74rem;
+  word-break: break-word;
+}
+
+.compact-empty {
+  min-height: 4.25rem;
+  display: grid;
+  place-items: center;
+}
+
+.compact-url {
+  min-height: 5.6rem;
+}
+
+.classification-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.classification-list div {
+  display: flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 0.72rem;
+  color: #e6e0ef;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.78rem;
+}
+
+.classification-list b {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.classification-list .is-current {
+  border-color: rgba(255, 45, 104, 0.52);
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.26), rgba(255, 45, 104, 0.16));
+  box-shadow: 0 0 20px rgba(255, 45, 104, 0.14);
 }
 
 .recommendation-list,
@@ -1049,6 +1307,17 @@ select {
 .report-block li svg {
   flex: 0 0 auto;
   color: var(--safe);
+}
+
+.dense-list {
+  gap: 0.5rem;
+}
+
+.dense-list li {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 0.58rem;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .threat-grid {
@@ -1086,6 +1355,24 @@ select {
   margin-top: 0.35rem;
   color: #bbb6c8;
   font-size: 0.75rem;
+}
+
+.compact-threat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.compact-threat-grid .threat-card {
+  padding: 0.68rem;
+}
+
+.compact-threat-grid .threat-card h3 {
+  font-size: 0.78rem;
+}
+
+.compact-threat-grid .threat-card p,
+.compact-threat-grid .threat-card small {
+  font-size: 0.68rem;
 }
 
 .severity-high {
@@ -1129,6 +1416,50 @@ select {
   color: #dedbe7;
   background: rgba(161, 161, 170, 0.12);
   border: 1px solid rgba(161, 161, 170, 0.32);
+}
+
+.scan-timeline {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.52rem;
+}
+
+.scan-timeline div {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 0.6rem;
+  align-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.scan-timeline div > span {
+  grid-row: span 2;
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.48);
+}
+
+.scan-timeline .is-done > span {
+  background: linear-gradient(135deg, #8b5cf6, #ff2d68);
+  box-shadow: 0 0 16px rgba(255, 45, 104, 0.56);
+}
+
+.scan-timeline p {
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.scan-timeline small {
+  color: var(--muted);
+  font-size: 0.68rem;
 }
 
 .history-page h1 {
@@ -1949,6 +2280,16 @@ select {
   .qr-preview-panel,
   .preview-card,
   .scan-analysis-card,
+  .live-status-card,
+  .analysis-summary-card,
+  .risk-meter-card,
+  .classification-card,
+  .detection-checks-card,
+  .extracted-details-card,
+  .recommendations-card,
+  .metadata-card,
+  .heuristic-card,
+  .timeline-card,
   .metric-card,
   .history-widget,
   .activity-widget,
@@ -1995,6 +2336,19 @@ select {
   .landing-hero,
   .report-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dense-check-grid,
+  .compact-threat-grid,
+  .compact-facts,
+  .compact-facts.three,
+  .compact-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .workstation-card,
+  .workstation-card.top-row {
+    min-height: auto;
   }
 
   .recommendations,

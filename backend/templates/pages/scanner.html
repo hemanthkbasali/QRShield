@@ -2,23 +2,23 @@
 {% block title %}QR Scanner | QRShield{% endblock %}
 {% block app_label %}QR Analysis Workspace{% endblock %}
 {% block app_content %}
-<section class="scanner-layout">
-  <article class="panel-card upload-panel">
-    <div class="section-heading">
+<section class="scanner-layout workstation-layout">
+  <article class="panel-card upload-panel workstation-card top-row">
+    <div class="section-heading compact">
       <div>
         <p class="eyebrow">QR Upload & Decode</p>
-        <h1>Scanner Workspace</h1>
+        <h1>Upload</h1>
       </div>
-      <span class="live-pill"><span></span>Engine online</span>
+      <span class="live-pill"><span></span>Ready</span>
     </div>
-    <form method="post" enctype="multipart/form-data" class="scan-form" data-scan-form novalidate>
+    <form method="post" enctype="multipart/form-data" class="scan-form dense-form" data-scan-form novalidate>
       {% csrf_token %}
-      <label id="dropzone" class="dropzone">
+      <label id="dropzone" class="dropzone compact-dropzone">
         <input id="qrUploadInput" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden required>
         <i data-lucide="upload-cloud"></i>
-        <span>Drop zone - drop files</span>
-        <small>or browse your QR image</small>
-        <b id="fileName">Choose QR image</b>
+        <span>Drop QR image</span>
+        <small>PNG, JPG, WEBP, BMP up to 5 MB</small>
+        <b id="fileName">Choose image</b>
       </label>
       {% if form.image.errors %}
         <div class="form-error">{{ form.image.errors.0 }}</div>
@@ -30,12 +30,16 @@
         <div><span></span></div>
         <small>Uploading image, decoding QR, and running phishing checks...</small>
       </div>
-      <button class="btn-hot mt-4" type="submit">Analyze QR <i data-lucide="scan-search"></i></button>
+      <button class="btn-hot w-full" type="submit">Analyze QR <i data-lucide="scan-search"></i></button>
     </form>
   </article>
 
-  <article class="panel-card preview-card">
-    <div class="preview-frame">
+  <article class="panel-card preview-card workstation-card top-row">
+    <div class="section-heading compact">
+      <h2>QR Preview</h2>
+      <span>Image input</span>
+    </div>
+    <div class="preview-frame compact-preview">
       <img id="qrPreview" alt="QR preview" class="hidden">
       <div id="qrPreviewFallback" class="qr-neon-sample">
         <div class="qr-sample-grid">
@@ -45,102 +49,196 @@
         </div>
       </div>
     </div>
-    <div class="preview-meta">
-      <span>QR preview</span>
-      <strong>Decode with pyzbar/OpenCV</strong>
+    <div class="preview-meta dense-meta">
+      <span>Decoder</span>
+      <strong>pyzbar with OpenCV fallback</strong>
     </div>
   </article>
 
-  <article class="panel-card scan-analysis-card {% if selected_scan %}level-{{ selected_scan.risk_level }}{% endif %}">
+  <article class="panel-card live-status-card workstation-card top-row">
     <div class="section-heading compact">
-      <h2>Analysis result</h2>
+      <h2>Live Scan Status</h2>
       {% if selected_scan %}
         {% with scan=selected_scan %}{% include "components/risk_badge.html" %}{% endwith %}
       {% else %}
-        <span>Waiting for upload</span>
+        <span>Idle</span>
       {% endif %}
     </div>
+    <div class="status-stack">
+      <div><span class="pulse-dot safe"></span><p>Upload validation</p><small>Format and size checks active</small></div>
+      <div><span class="pulse-dot warn"></span><p>Decode pipeline</p><small>pyzbar/OpenCV QR extraction</small></div>
+      <div><span class="pulse-dot {% if selected_scan and selected_scan.risk_level == 'malicious' %}danger{% else %}safe{% endif %}"></span><p>Latest result</p><small>{% if selected_scan %}{{ selected_scan.status_label }} - {{ selected_scan.risk_score }}/100{% else %}Waiting for a QR image{% endif %}</small></div>
+    </div>
+    <div class="metadata-grid compact-metrics">
+      <div><span>Total</span><strong>{{ metrics.total|default:0 }}</strong></div>
+      <div><span>Warnings</span><strong>{{ metrics.warning|default:0 }}</strong></div>
+      <div><span>Malicious</span><strong>{{ metrics.malicious|default:0 }}</strong></div>
+    </div>
+  </article>
+
+  <article class="panel-card analysis-summary-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Analysis Result</h2>
+      <span>{% if selected_scan %}{{ selected_scan.scan_hash }}{% else %}No active scan{% endif %}</span>
+    </div>
     {% if selected_scan %}
-      <div class="risk-orb compact-orb" style="--score: {{ selected_scan.risk_score }};" data-meter>
-        <strong>{{ selected_scan.risk_score }}</strong>
-        <span>/100</span>
-      </div>
-      <div class="risk-track"><span style="width: {{ selected_scan.risk_score }}%"></span></div>
-      <div class="extracted-url mt-3">
-        <i data-lucide="link-2"></i>
-        <span>{{ selected_scan.normalized_url|default:selected_scan.extracted_text|default:"No decoded payload" }}</span>
-      </div>
-      <div class="metadata-grid single">
+      <div class="summary-value">{{ selected_scan.normalized_url|default:selected_scan.extracted_text|default:"No decoded payload"|truncatechars:86 }}</div>
+      <div class="compact-facts">
+        <div><span>Payload type</span><strong>{{ selected_scan.metadata.input_type|default:"unknown"|title }}</strong></div>
         <div><span>Decoder</span><strong>{{ selected_scan.metadata.decoder|default:"auto" }}</strong></div>
-        <div><span>Timestamp</span><strong>{{ selected_scan.created_at|date:"M d, Y H:i" }}</strong></div>
       </div>
       <div class="quick-actions">
         <a class="btn-secondary" href="{% url 'result' selected_scan.id %}"><i data-lucide="file-search"></i> Full result</a>
-        <a class="btn-primary" href="{% url 'download_report' selected_scan.id %}"><i data-lucide="download"></i> PDF report</a>
+        <a class="btn-primary" href="{% url 'download_report' selected_scan.id %}"><i data-lucide="download"></i> PDF</a>
       </div>
     {% else %}
-      <div class="empty-state">Upload a QR image to extract the payload, calculate a risk score, and store the scan.</div>
-      <div class="check-grid compact-checks">
-        <div><i data-lucide="lock"></i><span>HTTPS validation</span></div>
-        <div><i data-lucide="server"></i><span>IP URL check</span></div>
-        <div><i data-lucide="fingerprint"></i><span>Domain entropy</span></div>
+      <div class="empty-state compact-empty">Upload a QR image to decode and analyze the embedded URL or text.</div>
+      <div class="compact-facts">
+        <div><span>Storage</span><strong>Database</strong></div>
+        <div><span>Reports</span><strong>PDF</strong></div>
       </div>
     {% endif %}
   </article>
 
-  <article class="panel-card full-span">
+  <article class="panel-card risk-meter-card workstation-card {% if selected_scan %}level-{{ selected_scan.risk_level }}{% endif %}">
     <div class="section-heading compact">
-      <h2>Detection breakdown</h2>
-      <span>HTTPS, suspicious keywords, URL length, IP URLs, shorteners, entropy, Unicode spoofing</span>
+      <h2>Risk Score Meter</h2>
+      <span>{% if selected_scan %}{{ selected_scan.risk_score }}/100{% else %}0/100{% endif %}</span>
+    </div>
+    <div class="risk-orb compact-orb" style="--score: {% if selected_scan %}{{ selected_scan.risk_score }}{% else %}0{% endif %};" data-meter>
+      <strong>{% if selected_scan %}{{ selected_scan.risk_score }}{% else %}0{% endif %}</strong>
+      <span>/100</span>
+    </div>
+    <div class="risk-track"><span style="width: {% if selected_scan %}{{ selected_scan.risk_score }}{% else %}0{% endif %}%"></span></div>
+    <div class="risk-scale">
+      <span>Safe</span><span>Warning</span><span>Malicious</span>
+    </div>
+  </article>
+
+  <article class="panel-card classification-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Threat Classification</h2>
+      {% if selected_scan %}
+        {% with scan=selected_scan %}{% include "components/risk_badge.html" %}{% endwith %}
+      {% else %}
+        <span>Pending</span>
+      {% endif %}
+    </div>
+    <div class="classification-list">
+      <div class="{% if selected_scan and selected_scan.risk_level == 'safe' %}is-current{% endif %}"><span>Safe</span><b>0-34</b></div>
+      <div class="{% if selected_scan and selected_scan.risk_level == 'warning' %}is-current{% endif %}"><span>Warning</span><b>35-69</b></div>
+      <div class="{% if selected_scan and selected_scan.risk_level == 'malicious' %}is-current{% endif %}"><span>Malicious</span><b>70-100</b></div>
+    </div>
+  </article>
+
+  <article class="panel-card detection-checks-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Detection Checks</h2>
+      <span>Heuristic engine</span>
+    </div>
+    <div class="check-grid dense-check-grid">
+      <div><i data-lucide="lock"></i><span>HTTPS validation</span></div>
+      <div><i data-lucide="server"></i><span>IP URL detection</span></div>
+      <div><i data-lucide="key-round"></i><span>Suspicious keywords</span></div>
+      <div><i data-lucide="ruler"></i><span>URL length analysis</span></div>
+      <div><i data-lucide="scissors"></i><span>URL shorteners</span></div>
+      <div><i data-lucide="fingerprint"></i><span>Entropy/domain</span></div>
+      <div><i data-lucide="languages"></i><span>Unicode spoofing</span></div>
+      <div><i data-lucide="route"></i><span>Redirect parameters</span></div>
+    </div>
+  </article>
+
+  <article class="panel-card extracted-details-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Extracted URL Details</h2>
+      <span>{% if selected_scan and selected_scan.normalized_url %}URL{% elif selected_scan %}Text{% else %}Waiting{% endif %}</span>
+    </div>
+    <div class="extracted-url compact-url">
+      <i data-lucide="link-2"></i>
+      <span>{% if selected_scan %}{{ selected_scan.normalized_url|default:selected_scan.extracted_text|default:"No decoded payload" }}{% else %}Decoded payload appears here after analysis.{% endif %}</span>
+    </div>
+    <div class="compact-facts three">
+      <div><span>Scheme</span><strong>{{ selected_scan.metadata.scheme|default:"-" }}</strong></div>
+      <div><span>Host</span><strong>{{ selected_scan.metadata.hostname|default:"-"|truncatechars:26 }}</strong></div>
+      <div><span>Length</span><strong>{{ selected_scan.metadata.url_length|default:"0" }}</strong></div>
+    </div>
+  </article>
+
+  <article class="panel-card recommendations-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Recommendations</h2>
+      <span>Response guide</span>
     </div>
     {% if selected_scan %}
-      <div class="threat-grid">
-        {% for threat in selected_scan.threats %}
+      <ul class="recommendation-list dense-list">
+        {% for item in selected_scan.recommendations|slice:":4" %}
+          <li><i data-lucide="check-circle-2"></i><span>{{ item }}</span></li>
+        {% empty %}
+          <li><i data-lucide="check-circle-2"></i><span>No extra recommendations were generated.</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state compact-empty">Recommendations are generated from the detected indicators.</div>
+    {% endif %}
+  </article>
+
+  <article class="panel-card metadata-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Scan Metadata</h2>
+      <span>Audit fields</span>
+    </div>
+    <div class="metadata-grid single dense-metadata">
+      <div><span>Scan hash</span><strong>{% if selected_scan %}{{ selected_scan.scan_hash }}{% else %}-{% endif %}</strong></div>
+      <div><span>Timestamp</span><strong>{% if selected_scan %}{{ selected_scan.created_at|date:"M d, Y H:i" }}{% else %}-{% endif %}</strong></div>
+      <div><span>Source IP</span><strong>{% if selected_scan %}{{ selected_scan.source_ip|default:"local" }}{% else %}-{% endif %}</strong></div>
+      <div><span>Report</span><strong>{% if selected_scan and selected_scan.report_file %}Generated{% else %}Pending{% endif %}</strong></div>
+    </div>
+  </article>
+
+  <article class="panel-card heuristic-card workstation-card">
+    <div class="section-heading compact">
+      <h2>Heuristic Breakdown</h2>
+      <span>{% if selected_scan %}{{ selected_scan.threats|length }} findings{% else %}No scan{% endif %}</span>
+    </div>
+    <div class="threat-grid compact-threat-grid">
+      {% if selected_scan %}
+        {% for threat in selected_scan.threats|slice:":4" %}
           <div class="threat-card severity-{{ threat.severity }}">
             <div>
               <span>{{ threat.severity|upper }}</span>
               <strong>+{{ threat.weight }}</strong>
             </div>
             <h3>{{ threat.title }}</h3>
-            <p>{{ threat.description }}</p>
-            {% if threat.evidence %}<small>{{ threat.evidence }}</small>{% endif %}
+            {% if threat.evidence %}<small>{{ threat.evidence }}</small>{% else %}<small>{{ threat.description|truncatechars:76 }}</small>{% endif %}
           </div>
         {% empty %}
           <div class="threat-card severity-low">
             <div><span>LOW</span><strong>+0</strong></div>
             <h3>No phishing indicators</h3>
-            <p>The URL passed the configured mini-project heuristic checks.</p>
+            <small>The URL passed the configured heuristic checks.</small>
           </div>
         {% endfor %}
-      </div>
-    {% else %}
-      <div class="check-grid">
-        <div><i data-lucide="lock"></i><span>HTTPS validation</span></div>
-        <div><i data-lucide="server"></i><span>IP-based URL detection</span></div>
-        <div><i data-lucide="key-round"></i><span>Suspicious keyword detection</span></div>
-        <div><i data-lucide="scissors"></i><span>URL shortener detection</span></div>
-        <div><i data-lucide="fingerprint"></i><span>Entropy/domain analysis</span></div>
-        <div><i data-lucide="languages"></i><span>Unicode spoof detection</span></div>
-      </div>
-    {% endif %}
+      {% else %}
+        <div class="threat-card severity-low">
+          <div><span>INFO</span><strong>0</strong></div>
+          <h3>Awaiting scan</h3>
+          <small>Detection findings appear after QR analysis.</small>
+        </div>
+      {% endif %}
+    </div>
   </article>
 
-  <article class="panel-card full-span">
+  <article class="panel-card timeline-card workstation-card">
     <div class="section-heading compact">
-      <h2>Recommendations</h2>
-      <span>Generated from the detected risk indicators</span>
+      <h2>Scan Timeline</h2>
+      <span>Workflow</span>
     </div>
-    {% if selected_scan %}
-      <ul class="recommendation-list">
-        {% for item in selected_scan.recommendations %}
-          <li><i data-lucide="check-circle-2"></i><span>{{ item }}</span></li>
-        {% empty %}
-          <li><i data-lucide="check-circle-2"></i><span>No extra recommendations were generated for this scan.</span></li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <div class="empty-state">Recommendations appear after QR decoding and phishing analysis completes.</div>
-    {% endif %}
+    <div class="scan-timeline">
+      <div class="{% if selected_scan %}is-done{% endif %}"><span></span><p>Image upload validation</p><small>Size, extension, readable image</small></div>
+      <div class="{% if selected_scan and selected_scan.extracted_text %}is-done{% endif %}"><span></span><p>QR decode</p><small>{% if selected_scan %}{{ selected_scan.metadata.decoder|default:"auto" }}{% else %}pyzbar/OpenCV{% endif %}</small></div>
+      <div class="{% if selected_scan %}is-done{% endif %}"><span></span><p>Phishing heuristics</p><small>URL checks and risk scoring</small></div>
+      <div class="{% if selected_scan %}is-done{% endif %}"><span></span><p>Database storage</p><small>{% if selected_scan %}{{ selected_scan.status_label }} record saved{% else %}Pending{% endif %}</small></div>
+    </div>
   </article>
 </section>
 {% endblock %}
