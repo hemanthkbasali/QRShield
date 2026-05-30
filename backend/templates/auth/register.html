@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Register | QRShield{% endblock %}
+{% block body %}
+<main class="auth-stage register-stage">
+  <section class="auth-card register-card">
+    <div class="auth-logo">
+      <span class="brand-mark mx-auto"><i data-lucide="shield-check"></i></span>
+    </div>
+    <h1>REGISTER</h1>
+    <form method="post" class="auth-form" novalidate>
+      {% csrf_token %}
+      <div class="grid gap-3 md:grid-cols-2">
+        <label>
+          <span>Username</span>
+          <input class="input-lux" name="username" type="text" placeholder="your handle" required>
+        </label>
+        <label>
+          <span>Email</span>
+          <input class="input-lux" name="email" type="email" placeholder="you@company.com" required>
+        </label>
+      </div>
+      <label>
+        <span>Display name</span>
+        <input class="input-lux" name="first_name" type="text" placeholder="Security analyst">
+      </label>
+      <div class="grid gap-3 md:grid-cols-2">
+        <label>
+          <span>Password</span>
+          <span class="password-wrap">
+            <input id="registerPassword" class="input-lux" name="password1" type="password" autocomplete="new-password" placeholder="password" required>
+            <button type="button" class="ghost-eye" data-toggle-password aria-label="Show password"><i data-lucide="eye"></i></button>
+          </span>
+        </label>
+        <label>
+          <span>Confirm password</span>
+          <input class="input-lux" name="password2" type="password" autocomplete="new-password" placeholder="repeat password" required>
+        </label>
+      </div>
+      <div class="strength-shell">
+        <span>Password strength indicator</span>
+        <div class="strength-track"><span id="strengthBar"></span></div>
+      </div>
+      {% if form.errors %}
+        <div class="form-error">
+          {% for field in form %}
+            {% for error in field.errors %}<p>{{ error }}</p>{% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <button class="btn-primary w-full" type="submit">REGISTER</button>
+    </form>
+    <p class="auth-switch">Already secured? <a href="{% url 'login' %}">Log in</a></p>
+  </section>
+
+  <section class="signup-visual">
+    <div class="signup-grid">
+      <div class="mini-sec-card"><i data-lucide="lock-keyhole"></i></div>
+      <div class="mini-sec-card crimson"><i data-lucide="key-round"></i></div>
+      <div class="mini-sec-card"><i data-lucide="shield-alert"></i></div>
+      <div class="mini-sec-card crimson"><i data-lucide="heart-pulse"></i></div>
+    </div>
+  </section>
+</main>
+{% endblock %}

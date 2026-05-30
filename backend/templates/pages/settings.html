@@ -1,0 +1,56 @@
+{% extends "layouts/app.html" %}
+{% block title %}Profile | QRShield{% endblock %}
+{% block app_label %}Profile{% endblock %}
+{% block app_content %}
+<section class="settings-layout">
+  <article class="panel-card">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">User Authentication</p>
+        <h1>Profile</h1>
+      </div>
+      <i data-lucide="user-cog"></i>
+    </div>
+    <form method="post" class="settings-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="profile">
+      <label><span>First name</span><input class="input-lux" name="first_name" value="{{ request.user.first_name }}"></label>
+      <label><span>Last name</span><input class="input-lux" name="last_name" value="{{ request.user.last_name }}"></label>
+      <label><span>Email</span><input class="input-lux" name="email" type="email" value="{{ request.user.email }}"></label>
+      {% if profile_form.errors %}<div class="form-error">{{ profile_form.errors }}</div>{% endif %}
+      <button class="btn-primary" type="submit">Save profile</button>
+    </form>
+  </article>
+
+  <article class="panel-card">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Credential Management</p>
+        <h1>Password</h1>
+      </div>
+      <i data-lucide="key-round"></i>
+    </div>
+    <form method="post" class="settings-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="password">
+      <label><span>Current password</span><input class="input-lux" name="old_password" type="password"></label>
+      <label><span>New password</span><input class="input-lux" name="new_password1" type="password"></label>
+      <label><span>Confirm new password</span><input class="input-lux" name="new_password2" type="password"></label>
+      {% if password_form.errors %}<div class="form-error">{{ password_form.errors }}</div>{% endif %}
+      <button class="btn-hot" type="submit">Update password</button>
+    </form>
+  </article>
+
+  <article class="panel-card full-span">
+    <div class="section-heading compact">
+      <h2>Account summary</h2>
+      <span>Authenticated QRShield user</span>
+    </div>
+    <div class="metadata-grid">
+      <div><span>Username</span><strong>{{ request.user.username }}</strong></div>
+      <div><span>Email</span><strong>{{ request.user.email|default:"Not set" }}</strong></div>
+      <div><span>Joined</span><strong>{{ request.user.date_joined|date:"M d, Y" }}</strong></div>
+    </div>
+  </article>
+</section>
+{% endblock %}

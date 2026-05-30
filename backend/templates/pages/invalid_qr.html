@@ -1,0 +1,30 @@
+{% extends "layouts/app.html" %}
+{% block title %}Invalid QR | QRShield{% endblock %}
+{% block app_label %}Error / Invalid QR Page{% endblock %}
+{% block app_content %}
+<section class="invalid-layout">
+  <article class="panel-card invalid-card">
+    <div class="invalid-symbol">
+      <i data-lucide="scan-x"></i>
+    </div>
+    <p class="eyebrow">Decode failed</p>
+    <h1>Invalid or unreadable QR image</h1>
+    <p>The scanner could not extract a QR payload from the uploaded image. Try a sharper image with the full QR visible.</p>
+    {% if scan %}
+      <div class="threat-grid mt-6">
+        {% for threat in scan.threats %}
+          <div class="threat-card severity-low">
+            <div><span>INFO</span><strong>0</strong></div>
+            <h3>{{ threat.title }}</h3>
+            <p>{{ threat.description }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    <div class="flex flex-wrap justify-center gap-3 mt-7">
+      <a class="btn-primary" href="{% url 'scanner' %}"><i data-lucide="upload-cloud"></i> Upload another QR</a>
+      <a class="btn-secondary" href="{% url 'history' %}"><i data-lucide="history"></i> Scan history</a>
+    </div>
+  </article>
+</section>
+{% endblock %}

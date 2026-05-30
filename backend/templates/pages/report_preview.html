@@ -1,0 +1,81 @@
+{% extends "layouts/app.html" %}
+{% block title %}PDF Report Preview | QRShield{% endblock %}
+{% block app_label %}PDF Report Preview{% endblock %}
+{% block app_content %}
+<section class="report-preview-shell">
+  <article class="report-stage">
+    <div class="report-paper">
+      <header class="report-head">
+        <div class="brand-lockup">
+          <span class="brand-mark"><i data-lucide="shield-check"></i></span>
+          <span>QRShield</span>
+        </div>
+        <p>QR Phishing Detection<br>& Security Report Generator</p>
+      </header>
+
+      <section class="report-grid">
+        <div class="report-block classification">
+          <h2>Risk classification</h2>
+          <dl>
+            <div><dt>Status</dt><dd>{{ scan.status_label }}</dd></div>
+            <div><dt>Risk score</dt><dd>{{ scan.risk_score }}/100</dd></div>
+            <div><dt>Source</dt><dd>{{ scan.source_ip|default:"local" }}</dd></div>
+            <div><dt>Decoder</dt><dd>{{ scan.metadata.decoder|default:"auto" }}</dd></div>
+          </dl>
+          <div class="risk-track mt-4"><span style="width: {{ scan.risk_score }}%"></span></div>
+        </div>
+
+        <div class="report-block forensic">
+          <h2>Scan details</h2>
+          <p>{{ scan.extracted_text|default:"No decoded payload"|truncatechars:220 }}</p>
+          <dl class="report-details">
+            <div><dt>Scan ID</dt><dd>{{ scan.scan_hash }}</dd></div>
+            <div><dt>Timestamp</dt><dd>{{ scan.created_at|date:"M d, Y H:i" }}</dd></div>
+            <div><dt>URL</dt><dd>{{ scan.normalized_url|default:"Not a standard URL"|truncatechars:70 }}</dd></div>
+          </dl>
+        </div>
+
+        <div class="report-block recommendations">
+          <h2>Recommendations</h2>
+          <ul>
+            {% for item in scan.recommendations|slice:":4" %}
+              <li><i data-lucide="check-circle-2"></i>{{ item }}</li>
+            {% empty %}
+              <li><i data-lucide="check-circle-2"></i>No recommendations recorded.</li>
+            {% endfor %}
+          </ul>
+        </div>
+
+        <div class="report-block detection-summary">
+          <h2>Detection reasons</h2>
+          <ul>
+            {% for threat in scan.threats|slice:":4" %}
+              <li><i data-lucide="shield-alert"></i>{{ threat.title }}{% if threat.evidence %}: {{ threat.evidence|truncatechars:46 }}{% endif %}</li>
+            {% empty %}
+              <li><i data-lucide="shield-check"></i>No phishing indicators detected.</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </section>
+
+      <footer class="report-foot">
+        <span>QRShield</span>
+        <span>{{ scan.normalized_url|default:"non-url payload"|truncatechars:38 }}</span>
+        <span>{{ scan.status_label }} report</span>
+      </footer>
+    </div>
+  </article>
+
+  <aside class="panel-card report-actions">
+    <h1>Security Report</h1>
+    <p>Preview the generated PDF layout before downloading the academic scan report.</p>
+    <div class="metadata-grid single">
+      <div><span>Scan hash</span><strong>{{ scan.scan_hash }}</strong></div>
+      <div><span>Risk</span><strong>{{ scan.status_label }} - {{ scan.risk_score }}/100</strong></div>
+      <div><span>Timestamp</span><strong>{{ scan.created_at|date:"M d, Y H:i" }}</strong></div>
+    </div>
+    <a class="btn-primary w-full" href="{% url 'download_report' scan.id %}"><i data-lucide="download"></i> Download PDF</a>
+    <a class="btn-secondary w-full" href="{% url 'result' scan.id %}"><i data-lucide="arrow-left"></i> Back to Analysis</a>
+  </aside>
+</section>
+{% endblock %}

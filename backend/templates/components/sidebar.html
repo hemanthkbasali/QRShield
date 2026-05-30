@@ -1,0 +1,35 @@
+{% with active=request.resolver_match.url_name %}
+<aside class="sidebar">
+  <a href="{% url 'landing' %}" class="brand-lockup">
+    <span class="brand-mark"><i data-lucide="shield-check"></i></span>
+    <span>QRShield</span>
+  </a>
+
+  <nav class="side-nav" aria-label="Primary">
+    <a class="side-link {% if active == 'dashboard' %}is-active{% endif %}" href="{% url 'dashboard' %}">
+      <i data-lucide="layout-dashboard"></i><span>Dashboard</span>
+    </a>
+    <a class="side-link {% if active == 'scanner' or active == 'result' or active == 'invalid_qr' %}is-active{% endif %}" href="{% url 'scanner' %}">
+      <i data-lucide="scan-line"></i><span>Scanner</span>
+    </a>
+    <a class="side-link {% if active == 'history' %}is-active{% endif %}" href="{% url 'history' %}">
+      <i data-lucide="history"></i><span>Scan History</span>
+    </a>
+    <a class="side-link {% if active == 'threat_intel' %}is-active{% endif %}" href="{% url 'threat_intel' %}">
+      <i data-lucide="bar-chart-3"></i><span>Security Analytics</span>
+    </a>
+    <a class="side-link {% if active == 'report_preview' %}is-active{% endif %}" href="{% url 'history' %}">
+      <i data-lucide="file-bar-chart"></i><span>Reports</span>
+    </a>
+    <a class="side-link {% if active == 'settings' %}is-active{% endif %}" href="{% url 'settings' %}">
+      <i data-lucide="user-cog"></i><span>Profile</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <a class="side-link" href="{% url 'logout' %}">
+      <i data-lucide="log-out"></i><span>Logout</span>
+    </a>
+  </div>
+</aside>
+{% endwith %}

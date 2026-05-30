@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block body %}
+  <div class="app-shell">
+    {% include "components/sidebar.html" %}
+    <main class="app-main">
+      <header class="topbar">
+        <div>
+          <p class="topbar-kicker">{% block app_label %}Main Dashboard{% endblock %}</p>
+        </div>
+        <div class="topbar-actions">
+          <button class="icon-btn" type="button" aria-label="Inbox"><i data-lucide="inbox"></i></button>
+          <button class="icon-btn has-alert" type="button" aria-label="Notifications"><i data-lucide="bell"></i></button>
+          <button class="icon-btn" type="button" aria-label="Search"><i data-lucide="search"></i></button>
+          <div class="user-chip">
+            <span class="avatar-dot">{{ request.user.username|first|upper }}</span>
+            <span>{{ request.user.username|default:"QRShield" }}</span>
+            <i data-lucide="chevron-down"></i>
+          </div>
+        </div>
+      </header>
+      {% block app_content %}{% endblock %}
+    </main>
+  </div>
+{% endblock %}

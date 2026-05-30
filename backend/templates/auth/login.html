@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Login | QRShield{% endblock %}
+{% block body %}
+<main class="auth-stage">
+  <section class="security-illustration" aria-label="QRShield security illustration">
+    <div class="security-lines"></div>
+    <div class="security-core">
+      <span></span><span></span><span></span>
+    </div>
+  </section>
+
+  <section class="auth-card">
+    <div class="auth-logo">
+      <span class="brand-mark mx-auto"><i data-lucide="shield-check"></i></span>
+    </div>
+    <h1>LOGIN</h1>
+    <form method="post" class="auth-form" novalidate>
+      {% csrf_token %}
+      <label>
+        <span>Username</span>
+        <input class="input-lux" name="username" type="text" autocomplete="username" placeholder="email or username" required>
+      </label>
+      <label>
+        <span>Password</span>
+        <span class="password-wrap">
+          <input class="input-lux" name="password" type="password" autocomplete="current-password" placeholder="password" required>
+          <button type="button" class="ghost-eye" data-toggle-password aria-label="Show password"><i data-lucide="eye"></i></button>
+        </span>
+      </label>
+      <div class="auth-row">
+        <label class="check-line"><input name="remember" type="checkbox"> <span>Remember me</span></label>
+        <a href="{% url 'register' %}">Forgot password</a>
+      </div>
+      {% if form.errors %}
+        <p class="form-error">Invalid username or password.</p>
+      {% endif %}
+      <button class="btn-primary w-full" type="submit">LOGIN</button>
+    </form>
+    <p class="auth-switch">New to QRShield? <a href="{% url 'register' %}">Create account</a></p>
+  </section>
+
+</main>
+{% endblock %}

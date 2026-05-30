@@ -1,0 +1,71 @@
+{% extends "layouts/app.html" %}
+{% block title %}Threat Analysis | QRShield{% endblock %}
+{% block app_label %}Threat Analysis Results Page{% endblock %}
+{% block app_content %}
+<section class="result-layout">
+  <article class="panel-card risk-summary level-{{ scan.risk_level }}">
+    <p class="eyebrow">Analysis</p>
+    <h1>{{ scan.extracted_text|truncatechars:52 }}</h1>
+    <div class="risk-orb" style="--score: {{ scan.risk_score }};" data-meter>
+      <strong>{{ scan.risk_score }}</strong>
+      <span>/100</span>
+    </div>
+    <p class="threat-label">Risk: {{ scan.status_label|upper }}</p>
+    <div class="risk-track"><span style="width: {{ scan.risk_score }}%"></span></div>
+  </article>
+
+  <article class="panel-card extracted-card">
+    <div class="section-heading compact">
+      <h2>Extracted URL</h2>
+      {% include "components/risk_badge.html" %}
+    </div>
+    <div class="extracted-url">
+      <i data-lucide="link-2"></i>
+      <span>{{ scan.normalized_url|default:scan.extracted_text }}</span>
+    </div>
+    <div class="metadata-grid">
+      <div><span>Decoder</span><strong>{{ scan.metadata.decoder|default:"auto" }}</strong></div>
+      <div><span>Source IP</span><strong>{{ scan.source_ip|default:"local" }}</strong></div>
+      <div><span>Timestamp</span><strong>{{ scan.created_at|date:"M d, Y H:i" }}</strong></div>
+    </div>
+  </article>
+
+  <article class="panel-card recommendation-card">
+    <h2>Recommendation</h2>
+    <ul class="recommendation-list">
+      {% for item in scan.recommendations %}
+        <li><i data-lucide="check-circle-2"></i><span>{{ item }}</span></li>
+      {% endfor %}
+    </ul>
+  </article>
+
+  <article class="panel-card threat-cards full-span">
+    <div class="section-heading compact">
+      <h2>Detection breakdown</h2>
+      <div class="flex gap-2">
+        <a class="btn-secondary" href="{% url 'report_preview' scan.id %}"><i data-lucide="file-search"></i> Preview</a>
+        <a class="btn-primary" href="{% url 'download_report' scan.id %}"><i data-lucide="download"></i> PDF</a>
+      </div>
+    </div>
+    <div class="threat-grid">
+      {% for threat in scan.threats %}
+        <div class="threat-card severity-{{ threat.severity }}">
+          <div>
+            <span>{{ threat.severity|upper }}</span>
+            <strong>+{{ threat.weight }}</strong>
+          </div>
+          <h3>{{ threat.title }}</h3>
+          <p>{{ threat.description }}</p>
+          {% if threat.evidence %}<small>{{ threat.evidence }}</small>{% endif %}
+        </div>
+      {% empty %}
+        <div class="threat-card severity-low">
+          <div><span>LOW</span><strong>+0</strong></div>
+          <h3>No threat indicators</h3>
+          <p>The URL passed the configured heuristic checks.</p>
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{% endblock %}

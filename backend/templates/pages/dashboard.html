@@ -1,0 +1,123 @@
+{% extends "layouts/app.html" %}
+{% block title %}Dashboard | QRShield{% endblock %}
+{% block app_label %}Project Overview{% endblock %}
+{% block app_content %}
+<section class="dashboard-grid">
+  <article class="metric-card">
+    <span>Total scans</span>
+    <strong>{{ metrics.total|default:0 }}</strong>
+    <small>QR records stored in the database</small>
+  </article>
+  <article class="metric-card safe">
+    <span>Safe scans</span>
+    <strong>{{ metrics.safe|default:0 }}</strong>
+    <small>{{ metrics.safe_rate|default:0 }}% of analyzed records</small>
+  </article>
+  <article class="metric-card">
+    <span>Warning scans</span>
+    <strong>{{ metrics.warning|default:0 }}</strong>
+    <small>Needs manual review</small>
+  </article>
+  <article class="metric-card danger">
+    <span>Malicious scans</span>
+    <strong>{{ metrics.malicious|default:0 }}</strong>
+    <small>High-risk QR destinations</small>
+  </article>
+
+  <article class="panel-card history-widget">
+    <div class="section-heading compact">
+      <h2>Recent scans</h2>
+      <a href="{% url 'history' %}">View history</a>
+    </div>
+    <div class="mini-table">
+      <div class="mini-row head"><span>Hash</span><span>Status</span><span>Timestamp</span><span>Action</span></div>
+      {% for scan in metrics.recent %}
+        <div class="mini-row">
+          <span>{{ scan.scan_hash|truncatechars:13 }}</span>
+          <span>{{ scan.status_label }}</span>
+          <span>{{ scan.created_at|date:"M d, H:i" }}</span>
+          <a href="{% url 'result' scan.id %}">Open</a>
+        </div>
+      {% empty %}
+        <div class="empty-state">No scans yet. Start with a QR image in the scanner workspace.</div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card activity-widget">
+    <div class="section-heading compact">
+      <h2>Recent malicious URLs</h2>
+      <span>Database records only</span>
+    </div>
+    <div class="activity-list">
+      {% for scan in metrics.recent_malicious %}
+        <div>
+          <span class="pulse-dot danger"></span>
+          <p>{{ scan.normalized_url|truncatechars:48 }}</p>
+          <small>{{ scan.created_at|date:"M d, H:i" }} - {{ scan.risk_score }}/100</small>
+        </div>
+      {% empty %}
+        <div>
+          <span class="pulse-dot safe"></span>
+          <p>No malicious QR URLs recorded</p>
+          <small>Malicious detections will appear after scans are saved</small>
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card chart-panel">
+    <div class="section-heading compact">
+      <h2>Risk distribution</h2>
+      <span>{{ metrics.avg_score|default:0 }}/100 avg risk</span>
+    </div>
+    <div class="chart-box"><canvas id="dashboardRiskChart"></canvas></div>
+  </article>
+
+  <article class="panel-card chart-panel">
+    <div class="section-heading compact">
+      <h2>Scan trend</h2>
+      <span>Last 14 days</span>
+    </div>
+    <div class="chart-box"><canvas id="dashboardTrendChart"></canvas></div>
+  </article>
+
+  <article class="panel-card activity-widget">
+    <div class="section-heading compact">
+      <h2>Recent reports generated</h2>
+      <span>{{ metrics.reports_generated|default:0 }} PDFs</span>
+    </div>
+    <div class="activity-list">
+      {% for scan in metrics.recent_reports %}
+        <div>
+          <span class="pulse-dot warn"></span>
+          <p>{{ scan.scan_hash }}</p>
+          <small>{{ scan.status_label }} - updated {{ scan.updated_at|date:"M d, H:i" }}</small>
+        </div>
+      {% empty %}
+        <div>
+          <span class="pulse-dot"></span>
+          <p>No PDF reports generated yet</p>
+          <small>Use a scan result to download a report</small>
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card scanner-console quick-scan-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Quick action</p>
+        <h1>Analyze a QR image</h1>
+      </div>
+      <a href="{% url 'scanner' %}" class="icon-btn violet" aria-label="Open scanner"><i data-lucide="scan-line"></i></a>
+    </div>
+    <p class="subcopy">Open the dedicated scanner workspace to upload, decode, score, store, and report on a QR code.</p>
+    <div class="quick-actions">
+      <a class="btn-hot" href="{% url 'scanner' %}">Quick scan <i data-lucide="scan-search"></i></a>
+      <a class="btn-secondary" href="{% url 'threat_intel' %}">Security analytics <i data-lucide="bar-chart-3"></i></a>
+    </div>
+  </article>
+</section>
+{{ metrics.chart_data|json_script:"dashboard-chart-data" }}
+{% endblock %}

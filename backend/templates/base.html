@@ -1,0 +1,57 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}QRShield{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#050506",
+            panel: "#111016",
+            panelSoft: "#191622",
+            neon: "#8b5cf6",
+            neonHot: "#e94082",
+            crimson: "#ff2d68"
+          },
+          boxShadow: {
+            neon: "0 0 28px rgba(139, 92, 246, .45)",
+            crimson: "0 0 30px rgba(255, 45, 104, .38)"
+          },
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui", "Segoe UI", "Arial", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'scanner/css/styles.css' %}">
+  <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script defer src="{% static 'scanner/js/app.js' %}"></script>
+</head>
+<body class="min-h-screen bg-ink text-zinc-100 antialiased">
+  <div class="ambient-scene" aria-hidden="true">
+    <div class="scan-grid"></div>
+    <div class="violet-wake"></div>
+    <div class="crimson-wake"></div>
+  </div>
+
+  {% if messages %}
+    <div class="fixed right-4 top-4 z-50 grid gap-2">
+      {% for message in messages %}
+        <div class="toast-message {{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block body %}{% endblock %}
+</body>
+</html>

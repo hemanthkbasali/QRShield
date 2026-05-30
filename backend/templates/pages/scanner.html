@@ -1,0 +1,146 @@
+{% extends "layouts/app.html" %}
+{% block title %}QR Scanner | QRShield{% endblock %}
+{% block app_label %}QR Analysis Workspace{% endblock %}
+{% block app_content %}
+<section class="scanner-layout">
+  <article class="panel-card upload-panel">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">QR Upload & Decode</p>
+        <h1>Scanner Workspace</h1>
+      </div>
+      <span class="live-pill"><span></span>Engine online</span>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="scan-form" data-scan-form novalidate>
+      {% csrf_token %}
+      <label id="dropzone" class="dropzone">
+        <input id="qrUploadInput" name="image" type="file" accept="image/png,image/jpeg,image/webp,image/bmp" hidden required>
+        <i data-lucide="upload-cloud"></i>
+        <span>Drop zone - drop files</span>
+        <small>or browse your QR image</small>
+        <b id="fileName">Choose QR image</b>
+      </label>
+      {% if form.image.errors %}
+        <div class="form-error">{{ form.image.errors.0 }}</div>
+      {% endif %}
+      {% if form.non_field_errors %}
+        <div class="form-error">{{ form.non_field_errors.0 }}</div>
+      {% endif %}
+      <div class="scan-progress" data-scan-progress hidden>
+        <div><span></span></div>
+        <small>Uploading image, decoding QR, and running phishing checks...</small>
+      </div>
+      <button class="btn-hot mt-4" type="submit">Analyze QR <i data-lucide="scan-search"></i></button>
+    </form>
+  </article>
+
+  <article class="panel-card preview-card">
+    <div class="preview-frame">
+      <img id="qrPreview" alt="QR preview" class="hidden">
+      <div id="qrPreviewFallback" class="qr-neon-sample">
+        <div class="qr-sample-grid">
+          {% for item in "1234567891234567" %}
+            <span></span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    <div class="preview-meta">
+      <span>QR preview</span>
+      <strong>Decode with pyzbar/OpenCV</strong>
+    </div>
+  </article>
+
+  <article class="panel-card scan-analysis-card {% if selected_scan %}level-{{ selected_scan.risk_level }}{% endif %}">
+    <div class="section-heading compact">
+      <h2>Analysis result</h2>
+      {% if selected_scan %}
+        {% with scan=selected_scan %}{% include "components/risk_badge.html" %}{% endwith %}
+      {% else %}
+        <span>Waiting for upload</span>
+      {% endif %}
+    </div>
+    {% if selected_scan %}
+      <div class="risk-orb compact-orb" style="--score: {{ selected_scan.risk_score }};" data-meter>
+        <strong>{{ selected_scan.risk_score }}</strong>
+        <span>/100</span>
+      </div>
+      <div class="risk-track"><span style="width: {{ selected_scan.risk_score }}%"></span></div>
+      <div class="extracted-url mt-3">
+        <i data-lucide="link-2"></i>
+        <span>{{ selected_scan.normalized_url|default:selected_scan.extracted_text|default:"No decoded payload" }}</span>
+      </div>
+      <div class="metadata-grid single">
+        <div><span>Decoder</span><strong>{{ selected_scan.metadata.decoder|default:"auto" }}</strong></div>
+        <div><span>Timestamp</span><strong>{{ selected_scan.created_at|date:"M d, Y H:i" }}</strong></div>
+      </div>
+      <div class="quick-actions">
+        <a class="btn-secondary" href="{% url 'result' selected_scan.id %}"><i data-lucide="file-search"></i> Full result</a>
+        <a class="btn-primary" href="{% url 'download_report' selected_scan.id %}"><i data-lucide="download"></i> PDF report</a>
+      </div>
+    {% else %}
+      <div class="empty-state">Upload a QR image to extract the payload, calculate a risk score, and store the scan.</div>
+      <div class="check-grid compact-checks">
+        <div><i data-lucide="lock"></i><span>HTTPS validation</span></div>
+        <div><i data-lucide="server"></i><span>IP URL check</span></div>
+        <div><i data-lucide="fingerprint"></i><span>Domain entropy</span></div>
+      </div>
+    {% endif %}
+  </article>
+
+  <article class="panel-card full-span">
+    <div class="section-heading compact">
+      <h2>Detection breakdown</h2>
+      <span>HTTPS, suspicious keywords, URL length, IP URLs, shorteners, entropy, Unicode spoofing</span>
+    </div>
+    {% if selected_scan %}
+      <div class="threat-grid">
+        {% for threat in selected_scan.threats %}
+          <div class="threat-card severity-{{ threat.severity }}">
+            <div>
+              <span>{{ threat.severity|upper }}</span>
+              <strong>+{{ threat.weight }}</strong>
+            </div>
+            <h3>{{ threat.title }}</h3>
+            <p>{{ threat.description }}</p>
+            {% if threat.evidence %}<small>{{ threat.evidence }}</small>{% endif %}
+          </div>
+        {% empty %}
+          <div class="threat-card severity-low">
+            <div><span>LOW</span><strong>+0</strong></div>
+            <h3>No phishing indicators</h3>
+            <p>The URL passed the configured mini-project heuristic checks.</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="check-grid">
+        <div><i data-lucide="lock"></i><span>HTTPS validation</span></div>
+        <div><i data-lucide="server"></i><span>IP-based URL detection</span></div>
+        <div><i data-lucide="key-round"></i><span>Suspicious keyword detection</span></div>
+        <div><i data-lucide="scissors"></i><span>URL shortener detection</span></div>
+        <div><i data-lucide="fingerprint"></i><span>Entropy/domain analysis</span></div>
+        <div><i data-lucide="languages"></i><span>Unicode spoof detection</span></div>
+      </div>
+    {% endif %}
+  </article>
+
+  <article class="panel-card full-span">
+    <div class="section-heading compact">
+      <h2>Recommendations</h2>
+      <span>Generated from the detected risk indicators</span>
+    </div>
+    {% if selected_scan %}
+      <ul class="recommendation-list">
+        {% for item in selected_scan.recommendations %}
+          <li><i data-lucide="check-circle-2"></i><span>{{ item }}</span></li>
+        {% empty %}
+          <li><i data-lucide="check-circle-2"></i><span>No extra recommendations were generated for this scan.</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="empty-state">Recommendations appear after QR decoding and phishing analysis completes.</div>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

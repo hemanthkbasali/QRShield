@@ -1,0 +1,78 @@
+{% extends "layouts/app.html" %}
+{% block title %}Scan History | QRShield{% endblock %}
+{% block app_label %}Scan History{% endblock %}
+{% block app_content %}
+<section class="history-page">
+  <div class="section-heading">
+    <div>
+      <h1>SCAN HISTORY</h1>
+      <p class="subcopy">Search, filter, and download forensic QR security reports.</p>
+    </div>
+    <span class="timeline-label">Timeline view</span>
+  </div>
+
+  <article class="panel-card table-panel">
+    <form class="history-filters" method="get">
+      <div class="input-icon">
+        <i data-lucide="search"></i>
+        <input class="input-lux" name="q" value="{{ query }}" placeholder="Search">
+      </div>
+      <select class="input-lux" name="status">
+        <option value="">All statuses</option>
+        <option value="safe" {% if status == "safe" %}selected{% endif %}>Safe</option>
+        <option value="warning" {% if status == "warning" %}selected{% endif %}>Warning</option>
+        <option value="malicious" {% if status == "malicious" %}selected{% endif %}>Malicious</option>
+        <option value="invalid" {% if status == "invalid" %}selected{% endif %}>Invalid</option>
+      </select>
+      <button class="icon-btn violet" type="submit" aria-label="Apply filters"><i data-lucide="sliders-horizontal"></i></button>
+    </form>
+
+    <div class="scan-table-wrap">
+      <table class="scan-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Scan Hash</th>
+            <th>Source IP</th>
+            <th>URL</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for scan in scans %}
+            <tr>
+              <td>{{ scan.created_at|date:"d.m.Y H:i:s" }}</td>
+              <td>{{ scan.scan_hash|truncatechars:18 }}</td>
+              <td>{{ scan.source_ip|default:"local" }}</td>
+              <td>{{ scan.normalized_url|default:scan.extracted_text|truncatechars:34 }}</td>
+              <td>{% include "components/risk_badge.html" %}</td>
+              <td>
+                <a class="table-action" href="{% url 'report_preview' scan.id %}">Generate/Download</a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="6" class="empty-state">No scans match this filter.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+      <nav class="pagination-controls" aria-label="Scan history pagination">
+        {% if page_obj.has_previous %}
+          <a class="btn-secondary" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.previous_page_number }}"><i data-lucide="chevron-left"></i> Previous</a>
+        {% else %}
+          <span class="btn-secondary is-disabled"><i data-lucide="chevron-left"></i> Previous</span>
+        {% endif %}
+        <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a class="btn-secondary" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page_obj.next_page_number }}">Next <i data-lucide="chevron-right"></i></a>
+        {% else %}
+          <span class="btn-secondary is-disabled">Next <i data-lucide="chevron-right"></i></span>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </article>
+</section>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}QRShield - QR Phishing Detection{% endblock %}
+{% block body %}
+<main class="landing-page">
+  <nav class="landing-nav">
+    <a href="{% url 'landing' %}" class="brand-lockup">
+      <span class="brand-mark"><i data-lucide="shield-check"></i></span>
+      <span>QRShield</span>
+    </a>
+    <div class="hidden items-center gap-8 text-xs text-zinc-300 md:flex">
+      <a href="#features">Features</a>
+      <a href="{% url 'scanner' %}">Scanner</a>
+      <a href="{% url 'threat_intel' %}">API</a>
+      <a href="{% url 'history' %}">Blog</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a class="text-xs text-zinc-300" href="{% url 'login' %}">Log in</a>
+      <a class="btn-hot text-xs" href="{% url 'register' %}">Get Demo</a>
+    </div>
+  </nav>
+
+  <section class="landing-hero">
+    <div class="hero-copy">
+      <h1>ADVANCED<br>QR PHISHING<br>DEFENSE</h1>
+      <p>Enterprise QR threat detection, forensic scoring, and downloadable security reports for teams that need answers fast.</p>
+      <a class="btn-hot" href="{% url 'scanner' %}">Get Started <i data-lucide="arrow-right"></i></a>
+    </div>
+    <div class="hero-device" aria-label="Cybersecurity QR phone visual">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+          <div class="qr-code-art">
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <div class="scan-beam"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="feature-strip">
+    <article class="feature-card">
+      <i data-lucide="radar"></i>
+      <h2>REAL-TIME DETECTION</h2>
+      <p>Decode QR payloads and score destination risk instantly.</p>
+    </article>
+    <article class="feature-card danger">
+      <i data-lucide="brain-circuit"></i>
+      <h2>AI POWERED ANALYSIS</h2>
+      <p>Heuristic checks identify credential lures, shorteners, and suspicious domains.</p>
+    </article>
+    <article class="feature-card">
+      <i data-lucide="file-check-2"></i>
+      <h2>DETAILED REPORTS</h2>
+      <p>Generate executive-ready PDF reports with evidence and recommendations.</p>
+    </article>
+  </section>
+</main>
+{% endblock %}

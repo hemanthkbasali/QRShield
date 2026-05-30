@@ -1,0 +1,118 @@
+{% extends "layouts/app.html" %}
+{% block title %}Security Analytics | QRShield{% endblock %}
+{% block app_label %}Security Analytics{% endblock %}
+{% block app_content %}
+<section class="intel-layout">
+  <article class="metric-card">
+    <span>Total scans</span>
+    <strong>{{ intel.total|default:0 }}</strong>
+    <small>All saved QR analyses</small>
+  </article>
+  <article class="metric-card danger">
+    <span>Malicious detections</span>
+    <strong>{{ intel.malicious|default:0 }}</strong>
+    <small>{{ intel.malicious_recent|default:0 }} in the last 30 days</small>
+  </article>
+  <article class="metric-card">
+    <span>Warning detections</span>
+    <strong>{{ intel.warning|default:0 }}</strong>
+    <small>{{ intel.warning_recent|default:0 }} in the last 30 days</small>
+  </article>
+  <article class="metric-card safe">
+    <span>Reports generated</span>
+    <strong>{{ intel.reports_generated|default:0 }}</strong>
+    <small>{{ intel.report_rate|default:0 }}% report coverage</small>
+  </article>
+
+  <article class="panel-card analytics-wide">
+    <div class="section-heading compact">
+      <h1>Scan trends</h1>
+      <span>Last 30 days from stored scans</span>
+    </div>
+    <div class="chart-box large"><canvas id="analyticsTrendChart"></canvas></div>
+  </article>
+
+  <article class="panel-card analytics-side">
+    <div class="section-heading compact">
+      <h2>Risk distribution</h2>
+      <span>Current database</span>
+    </div>
+    <div class="chart-box"><canvas id="analyticsRiskChart"></canvas></div>
+  </article>
+
+  <article class="panel-card analytics-wide">
+    <div class="section-heading compact">
+      <h2>Top suspicious domains</h2>
+      <span>Warning and malicious scans</span>
+    </div>
+    {% if intel.top_domains %}
+      <div class="chart-box"><canvas id="analyticsDomainsChart"></canvas></div>
+    {% else %}
+      <div class="empty-state">No suspicious domains have been recorded yet.</div>
+    {% endif %}
+  </article>
+
+  <article class="panel-card analytics-side">
+    <div class="section-heading compact">
+      <h2>Report statistics</h2>
+      <span>Generated vs pending</span>
+    </div>
+    <div class="chart-box"><canvas id="analyticsReportChart"></canvas></div>
+  </article>
+
+  <article class="panel-card full-span">
+    <div class="section-heading compact">
+      <h2>Recent threats</h2>
+      <span>Latest warning and malicious records</span>
+    </div>
+    <div class="intel-threats">
+      {% for scan in intel.recent_threats %}
+        <div>
+          <i data-lucide="shield-alert"></i>
+          <span>{{ scan.normalized_url|default:scan.extracted_text|truncatechars:70 }}</span>
+          <b>{{ scan.status_label }} - {{ scan.risk_score }}/100</b>
+        </div>
+      {% empty %}
+        <div><i data-lucide="shield-check"></i><span>No recent threat records</span><b>0</b></div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card analytics-wide">
+    <div class="section-heading compact">
+      <h2>Top detection reasons</h2>
+      <span>Generated from saved scan explanations</span>
+    </div>
+    <div class="intel-threats">
+      {% for item in intel.top_threats %}
+        <div><i data-lucide="list-checks"></i><span>{{ item.title }}</span><b>{{ item.count }}</b></div>
+      {% empty %}
+        <div><i data-lucide="circle-dashed"></i><span>No detection reasons recorded yet</span><b>0</b></div>
+      {% endfor %}
+    </div>
+  </article>
+
+  <article class="panel-card analytics-side">
+    <div class="section-heading compact">
+      <h2>Recent reports</h2>
+      <span>Download history</span>
+    </div>
+    <div class="activity-list">
+      {% for scan in intel.recent_reports %}
+        <div>
+          <span class="pulse-dot warn"></span>
+          <p>{{ scan.scan_hash }}</p>
+          <small>{{ scan.updated_at|date:"M d, H:i" }} - {{ scan.status_label }}</small>
+        </div>
+      {% empty %}
+        <div>
+          <span class="pulse-dot"></span>
+          <p>No generated reports yet</p>
+          <small>Download a PDF from any completed scan</small>
+        </div>
+      {% endfor %}
+    </div>
+  </article>
+</section>
+{{ intel.chart_data|json_script:"security-analytics-data" }}
+{% endblock %}
