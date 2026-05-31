@@ -3,6 +3,7 @@ import re
 import unicodedata
 from urllib.parse import parse_qs, urlparse
 
+from .brand_detector import detect_brand_impersonation
 from .utils import clamp, shannon_entropy
 
 
@@ -138,6 +139,10 @@ def recommendation_for(threat_title):
         "Credential/payment lure": "Never enter OTP, password, card, or wallet information from an unsolicited QR.",
         "Redirect-heavy query": "Avoid QR links that immediately forward through redirect or tracking parameters.",
         "Non-URL QR content": "Treat non-URL payloads as data only; do not execute copied commands or scripts.",
+        "Brand impersonation": (
+            "This domain closely mimics a well-known brand. Navigate directly to the official website "
+            "by typing its address manually. Do NOT enter credentials or payment details."
+        ),
     }
     return mapping.get(threat_title, "Validate the sender and destination before interacting with this QR code.")
 
@@ -266,6 +271,49 @@ def analyze_payload(payload):
             f"{domain_without_tld} (entropy {entropy:.2f})",
         )
         score += weight
+
+    # -----------------------------------------------------------------------
+    # Brand impersonation check (Levenshtein + homoglyph normalisation)
+    # -----------------------------------------------------------------------
+    brand_match = detect_brand_impersonation(hostname)
+    if brand_match:
+        method_label = {
+            "exact_homoglyph": "exact homoglyph substitution",
+            "fuzzy": f"fuzzy similarity {brand_match.similarity:.0%}",
+        }.get(brand_match.method, brand_match.method)
+
+        evidence_detail = (
+            f"'{brand_match.candidate_sld}' ≈ '{brand_match.brand_name}' "
+            f"({method_label}); official domain: {brand_match.official_domain}"
+        )
+        if brand_match.normalised_candidate != brand_match.candidate_sld:
+            evidence_detail += f"; normalised form: '{brand_match.normalised_candidate}'"
+
+        # Weight is strong enough to push score past 70 (MALICIOUS) on its own.
+        brand_weight = 45
+        add_threat(
+            threats,
+            "Brand impersonation",
+            (
+                f"The domain '{hostname}' appears to impersonate {brand_match.brand_name} "
+                f"({brand_match.official_domain}) using typosquatting or character substitution. "
+                "This is a strong indicator of a phishing or credential-harvesting attack."
+            ),
+            "critical",
+            brand_weight,
+            evidence_detail,
+        )
+        score += brand_weight
+        metadata["brand_impersonation"] = {
+            "detected": True,
+            "brand": brand_match.brand_name,
+            "official_domain": brand_match.official_domain,
+            "similarity": round(brand_match.similarity, 4),
+            "method": brand_match.method,
+            "normalised_candidate": brand_match.normalised_candidate,
+        }
+    else:
+        metadata["brand_impersonation"] = {"detected": False}
 
     spoof_evidence = unicode_spoof_evidence(hostname)
     if spoof_evidence:
