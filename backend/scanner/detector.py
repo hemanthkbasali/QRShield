@@ -290,7 +290,8 @@ def analyze_payload(payload):
             evidence_detail += f"; normalised form: '{brand_match.normalised_candidate}'"
 
         # Weight is strong enough to push score past 70 (MALICIOUS) on its own.
-        brand_weight = 45
+        # 50 pts ensures even a bare http:// impersonation URL (base ~22 pts) exceeds the threshold.
+        brand_weight = 50
         add_threat(
             threats,
             "Brand impersonation",
