@@ -96,8 +96,8 @@ function initCustomSelects() {
   if (!selects.length) return;
 
   function closeSelect(select) {
-    const trigger = select.querySelector("[data-custom-select-trigger]");
-    const menu = select.querySelector("[data-custom-select-menu]");
+    const trigger = select._customSelectTrigger || select.querySelector("[data-custom-select-trigger]");
+    const menu = select._customSelectMenu || select.querySelector("[data-custom-select-menu]");
     if (!trigger || !menu) return;
     menu.hidden = true;
     trigger.setAttribute("aria-expanded", "false");
@@ -110,6 +110,23 @@ function initCustomSelects() {
     });
   }
 
+  function positionMenu(menu, trigger) {
+    const rect = trigger.getBoundingClientRect();
+    const viewportWidth = document.documentElement.clientWidth;
+    const menuWidth = Math.max(rect.width, 14 * 16);
+    let left = window.scrollX + rect.left;
+    const rightEdge = window.scrollX + viewportWidth - 12;
+
+    if (left + menuWidth > rightEdge) {
+      left = Math.max(window.scrollX + 12, rightEdge - menuWidth);
+    }
+
+    menu.style.position = "absolute";
+    menu.style.left = `${left}px`;
+    menu.style.top = `${window.scrollY + rect.bottom + 8}px`;
+    menu.style.width = `${Math.min(menuWidth, viewportWidth - 24)}px`;
+  }
+
   selects.forEach((select) => {
     const trigger = select.querySelector("[data-custom-select-trigger]");
     const menu = select.querySelector("[data-custom-select-menu]");
@@ -118,9 +135,15 @@ function initCustomSelects() {
     const options = Array.from(select.querySelectorAll("[data-value]"));
 
     if (!trigger || !menu || !input || !label || !options.length) return;
+    select._customSelectTrigger = trigger;
+    select._customSelectMenu = menu;
+    if (menu.parentElement !== document.body) {
+      document.body.appendChild(menu);
+    }
 
     function openSelect() {
       closeOtherSelects(select);
+      positionMenu(menu, trigger);
       menu.hidden = false;
       trigger.setAttribute("aria-expanded", "true");
       select.classList.add("is-open");

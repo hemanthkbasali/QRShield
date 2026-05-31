@@ -1,4 +1,4 @@
-#!D:\QRShield\backend\.venv\Scripts\python.exe
+#!D:\Projects-own\QRShield\backend\.venv\Scripts\python.exe
 from __future__ import print_function
 
 import argparse

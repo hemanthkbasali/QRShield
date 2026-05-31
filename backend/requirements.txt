@@ -5,3 +5,4 @@ pyzbar==0.1.9
 Pillow==10.4.0
 reportlab==4.2.2
 python-dotenv==1.0.1
+# zxingcpp — third-engine fallback; no Python 3.13 wheel available yet (optional)

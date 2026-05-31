@@ -1,1 +1,11 @@
-<span class="risk-badge risk-{{ scan.risk_level }}">{{ scan.status_label }}</span>
+{% if scan.risk_level == "safe" %}
+<span class="risk-badge risk-safe">Safe</span>
+{% elif scan.risk_level == "warning" %}
+<span class="risk-badge risk-warning">Warning</span>
+{% elif scan.risk_level == "malicious" %}
+<span class="risk-badge risk-malicious">Malicious</span>
+{% elif scan.risk_level == "invalid" %}
+<span class="risk-badge risk-invalid">Invalid</span>
+{% else %}
+<span class="risk-badge risk-invalid">Invalid</span>
+{% endif %}
